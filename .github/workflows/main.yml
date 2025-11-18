@@ -36,7 +36,7 @@ jobs:
       run: |
         briefcase create android
 
-    - name: Build Android APK (log everything)
+    - name: Build Android APK
       run: |
         briefcase build android -v 2>&1 | tee briefcase-build.log
       continue-on-error: true
