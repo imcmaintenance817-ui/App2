@@ -22,31 +22,26 @@ jobs:
     - name: Install system packages
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev unzip
+        sudo apt-get install -y build-essential libcairo2-dev pkg-config python3-dev unzip
 
     - name: Upgrade pip
       run: |
         python -m pip install --upgrade pip setuptools wheel
 
-    - name: Install Cairo dependencies
+    - name: Install Briefcase + dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libcairo2-dev pkg-config python3-dev
-
-    - name: Install Briefcase + Toga Android
-      run: |
-        pip install "briefcase>=0.3.24" "toga[android]>=0.4.0" GitPython
+        pip install "briefcase>=0.3.25" "toga[android]>=0.5.0" openpyxl GitPython
 
     - name: Create Android project
       run: |
         briefcase create android
 
-    - name: Build Android (capture log, never stop)
+    - name: Build Android APK (log everything)
       run: |
         briefcase build android -v 2>&1 | tee briefcase-build.log
       continue-on-error: true
 
-    - name: Package Android
+    - name: Package Android APK
       if: success()
       run: |
         briefcase package android -v 2>&1 | tee -a briefcase-build.log
@@ -55,8 +50,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: beeware-debug-output
+        name: dummyform-android-artifacts
         path: |
           build/android/**/*.apk
           briefcase-build.log
-          **/briefcase-build.log
