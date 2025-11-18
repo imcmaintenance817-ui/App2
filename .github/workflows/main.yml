@@ -8,7 +8,18 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+
+    steps:
+    - name: Install essential tools
+      run: sudo apt-get update && sudo apt-get install -y tar unzip curl git build-essential
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
 
     env:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
