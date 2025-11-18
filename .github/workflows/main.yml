@@ -1,5 +1,5 @@
 name: Build BeeWare Android APK
-# Comment
+
 on:
   push:
     branches: [ main ]
@@ -11,8 +11,8 @@ jobs:
     timeout-minutes: 120
 
     env:
-      ANDROID_HOME: ${{ runner.temp }}/android-sdk
-      PATH: ${{ runner.temp }}/android-sdk/cmdline-tools/latest/bin:${{ runner.temp }}/android-sdk/platform-tools:$PATH
+      ANDROID_HOME: ${{ github.workspace }}/android-sdk
+      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:$PATH
 
     steps:
     - name: Checkout repository
