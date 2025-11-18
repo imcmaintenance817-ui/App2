@@ -1,5 +1,5 @@
 name: Build BeeWare Android APK
-# Comment
+
 on:
   push:
     branches: [ main ]
@@ -9,68 +9,54 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Install essential tools
-      run: sudo apt-get update && sudo apt-get install -y tar unzip curl git build-essential
-
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-
     env:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
       PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:$PATH
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Install essential tools
+        run: sudo apt-get update && sudo apt-get install -y tar unzip curl git build-essential python3-dev libcairo2-dev pkg-config
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install system packages
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential python3-dev unzip curl libcairo2-dev pkg-config
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    - name: Install Android SDK Command-Line Tools
-      run: |
-        mkdir -p $ANDROID_HOME/cmdline-tools
-        curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9123335_latest.zip
-        unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
-        mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+      - name: Install Android SDK Command-Line Tools
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9123335_latest.zip
+          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
-    - name: Upgrade pip & install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel
-        pip install "briefcase>=0.3.25" "toga[android]>=0.5.0" openpyxl GitPython
+      - name: Upgrade pip & install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install "briefcase>=0.3.25" "toga[android]>=0.5.0" openpyxl GitPython
 
-    - name: Create Android project
-      run: |
-        briefcase create android
+      - name: Create Android project
+        run: |
+          briefcase create android
 
-    - name: Build Android APK
-      run: |
-        briefcase build android -v 2>&1 | tee briefcase-build.log
-      continue-on-error: true
+      - name: Build Android APK
+        run: |
+          briefcase build android -v 2>&1 | tee briefcase-build.log
+        continue-on-error: true
 
-    - name: Package Android APK
-      run: |
-        briefcase package android -v 2>&1 | tee -a briefcase-build.log
-      if: success()
+      - name: Package Android APK
+        if: success()
+        run: |
+          briefcase package android -v 2>&1 | tee -a briefcase-build.log
 
-    - name: Upload APK & logs
-      uses: actions/upload-artifact@v4
-      with:
-        name: dummyform-android-artifacts
-        path: |
-          build/android/**/*.apk
-          briefcase-build.log
+      - name: Upload APK & logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: dummyform-android-artifacts
+          path: |
+            build/android/**/*.apk
+            briefcase-build.log
